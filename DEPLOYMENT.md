@@ -49,10 +49,11 @@ sudo nano .env
 
 Set your configuration:
 ```
-PORT=8080
+PORT=2277
 API_KEY=your-production-api-key-here
 LOG_LEVEL=info
 TEMP_PATH=/tmp/pdf_service
+POPPLER_PATH=/usr/bin  # optional override if Poppler binaries are elsewhere
 ```
 
 ### 3. Build and Start Service
@@ -71,7 +72,7 @@ sudo docker-compose ps
 sudo docker-compose logs -f
 
 # Test health endpoint
-curl http://localhost:8080/health
+curl http://localhost:2277/health
 ```
 
 ## Optional: Reverse Proxy with Nginx
@@ -97,7 +98,7 @@ server {
     client_max_body_size 10M;
 
     location / {
-        proxy_pass http://localhost:8080;
+        proxy_pass http://localhost:2277;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -174,7 +175,7 @@ sudo ufw allow 'Nginx Full'
 ### Allow Direct Access (if not using Nginx)
 
 ```bash
-sudo ufw allow 8080/tcp
+sudo ufw allow 2277/tcp
 ```
 
 ## Backup
@@ -194,7 +195,7 @@ sudo cp .env /backup/.env.$(date +%Y%m%d)
 sudo docker-compose logs
 
 # Check if port is in use
-sudo netstat -tuln | grep 8080
+sudo netstat -tuln | grep 2277
 
 # Rebuild from scratch
 sudo docker-compose down

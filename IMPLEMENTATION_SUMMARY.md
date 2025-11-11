@@ -84,10 +84,11 @@ utility-service/
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PORT` | 8080 | Server port |
+| `PORT` | 2277 | Server port |
 | `API_KEY` | Required | Authentication key |
 | `LOG_LEVEL` | info | Logging verbosity |
 | `TEMP_PATH` | /tmp/pdf_service | Temporary storage |
+| `POPPLER_PATH` | _empty_ | Directory containing Poppler binaries (required on Windows) |
 
 ### API Response Format
 
@@ -161,7 +162,9 @@ utility-service/
 ### Helper Scripts
 
 - `start_local.bat`: Windows development server
-- `test_endpoint.bat`: Endpoint testing script
+- `start_local.sh`: Linux/macOS development server
+- `test_endpoint.bat`: Windows endpoint testing script
+- `test_endpoint.sh`: Linux/macOS endpoint testing script
 - Docker Compose configuration
 
 ### File Management
@@ -228,7 +231,7 @@ Each new service follows the pattern:
 
 - **Development**: Python 3.12+, poppler-utils
 - **Production**: Docker + 1 vCPU + 1 GB RAM
-- **Network**: Single port (8080)
+- **Network**: Single port (2277)
 
 ### Files Created
 

@@ -48,10 +48,11 @@ utility-service/
 2. Copy `.env.example` to `.env` and configure:
 
 ```bash
-PORT=8080
+PORT=2277
 API_KEY=your-secret-api-key
 LOG_LEVEL=info
 TEMP_PATH=/tmp/pdf_service
+POPPLER_PATH=/path/to/poppler/bin  # required on Windows
 ```
 
 3. Install dependencies:
@@ -68,7 +69,12 @@ pip install -r requirements.txt
 5. Run the application:
 
 ```bash
-uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+# Windows
+start_local.bat
+
+# Linux / macOS
+chmod +x start_local.sh
+./start_local.sh
 ```
 
 ### Docker Deployment
@@ -82,15 +88,15 @@ docker build -t utility-service .
 2. Run the container:
 
 ```bash
-docker run -d -p 8080:8080 --env-file .env utility-service
+docker run -d -p 2277:2277 --env-file .env utility-service
 ```
 
 Or use environment variables directly:
 
 ```bash
-docker run -d -p 8080:8080 \
+docker run -d -p 2277:2277 \
   -e API_KEY=your-secret-api-key \
-  -e PORT=8080 \
+  -e PORT=2277 \
   utility-service
 ```
 
@@ -159,7 +165,7 @@ POST /api/v1/pdf-to-images
 ### Testing with cURL
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/pdf-to-images \
+curl -X POST http://localhost:2277/api/v1/pdf-to-images \
   -H "x-api-key: your-secret-api-key" \
   -F "file=@sample.pdf"
 ```
@@ -169,7 +175,7 @@ curl -X POST http://localhost:8080/api/v1/pdf-to-images \
 1. Add an **HTTP Request** node
 2. Configure:
    - Method: `POST`
-   - URL: `http://your-server:8080/api/v1/pdf-to-images`
+   - URL: `http://your-server:2277/api/v1/pdf-to-images`
    - Authentication: None (use headers)
    - Headers: `x-api-key: your-secret-api-key`
    - Body: Binary File Upload
@@ -179,10 +185,11 @@ curl -X POST http://localhost:8080/api/v1/pdf-to-images \
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `PORT` | `8080` | Server port |
+| `PORT` | `2277` | Server port |
 | `API_KEY` | Required | API authentication key |
 | `LOG_LEVEL` | `info` | Logging level (debug, info, warning, error) |
 | `TEMP_PATH` | `/tmp/pdf_service` | Temporary file storage path |
+| `POPPLER_PATH` | _empty_ | Directory containing Poppler binaries (required on Windows) |
 
 ## Logging
 
