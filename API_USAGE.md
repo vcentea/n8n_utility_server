@@ -6,6 +6,80 @@
 
 **Authentication:** Required via `x-api-key` header
 
+**Query Parameters:**
+- `output_format` (optional): Output format for images
+  - `base64` (default) - Base64-encoded JPEG string
+  - `binary` - Raw JPEG bytes as array
+  - `both` - Both base64 and binary formats
+
+---
+
+## Output Format Examples
+
+### Base64 (Default)
+```bash
+curl -X POST "http://localhost:2277/api/v1/pdf-to-images?output_format=base64" \
+  -H "x-api-key: your-key" \
+  -F "file=@document.pdf"
+```
+
+Response:
+```json
+{
+  "pages": 1,
+  "images": [
+    {
+      "page": 1,
+      "file_name": "page_1.jpg",
+      "base64": "/9j/4AAQSkZJRgABAQEAYABgAAD..."
+    }
+  ]
+}
+```
+
+### Binary (Raw JPEG bytes)
+```bash
+curl -X POST "http://localhost:2277/api/v1/pdf-to-images?output_format=binary" \
+  -H "x-api-key: your-key" \
+  -F "file=@document.pdf"
+```
+
+Response:
+```json
+{
+  "pages": 1,
+  "images": [
+    {
+      "page": 1,
+      "file_name": "page_1.jpg",
+      "binary": [255, 216, 255, 224, 0, 16, 74, 70, ...]
+    }
+  ]
+}
+```
+
+### Both Formats
+```bash
+curl -X POST "http://localhost:2277/api/v1/pdf-to-images?output_format=both" \
+  -H "x-api-key: your-key" \
+  -F "file=@document.pdf"
+```
+
+Response:
+```json
+{
+  "pages": 1,
+  "images": [
+    {
+      "page": 1,
+      "file_name": "page_1.jpg",
+      "base64": "/9j/4AAQSkZJRgABAQEAYABgAAD...",
+      "binary": [255, 216, 255, 224, 0, 16, 74, 70, ...]
+    }
+  ]
+}
+```
+
 ---
 
 ## Binary Upload Methods
@@ -139,6 +213,7 @@ wget -qO- https://example.com/document.pdf | \
 
 ### Success (200 OK)
 
+**Base64 format (default):**
 ```json
 {
   "pages": 3,
@@ -152,11 +227,35 @@ wget -qO- https://example.com/document.pdf | \
       "page": 2,
       "file_name": "page_2.jpg",
       "base64": "iVBORw0KGgoAAAANSUhEUgAA..."
-    },
+    }
+  ]
+}
+```
+
+**Binary format:**
+```json
+{
+  "pages": 2,
+  "images": [
     {
-      "page": 3,
-      "file_name": "page_3.jpg",
-      "base64": "iVBORw0KGgoAAAANSUhEUgAA..."
+      "page": 1,
+      "file_name": "page_1.jpg",
+      "binary": [255, 216, 255, 224, 0, 16, 74, 70, ...]
+    }
+  ]
+}
+```
+
+**Both formats:**
+```json
+{
+  "pages": 1,
+  "images": [
+    {
+      "page": 1,
+      "file_name": "page_1.jpg",
+      "base64": "iVBORw0KGgoAAAANSUhEUgAA...",
+      "binary": [255, 216, 255, 224, 0, 16, 74, 70, ...]
     }
   ]
 }
@@ -167,7 +266,8 @@ wget -qO- https://example.com/document.pdf | \
 - `images`: Array of converted images
   - `page`: Page number (1-indexed)
   - `file_name`: Generated filename
-  - `base64`: Base64-encoded JPEG image data
+  - `base64`: Base64-encoded JPEG image data (if output_format is 'base64' or 'both')
+  - `binary`: Raw JPEG bytes as array (if output_format is 'binary' or 'both')
 
 ---
 
@@ -203,26 +303,28 @@ wget -qO- https://example.com/document.pdf | \
 
 ---
 
-## Working with Base64 Images
+## Working with Images
 
-### Decode and Save (Python)
+### Base64 Format
 
+**Decode and Save (Python):**
 ```python
 import base64
 from pathlib import Path
 
-response = requests.post(...).json()
+response = requests.post(
+    "http://localhost:2277/api/v1/pdf-to-images",
+    files={"file": open("doc.pdf", "rb")},
+    headers={"x-api-key": "your-key"},
+    params={"output_format": "base64"}
+).json()
 
 for img in response['images']:
-    # Decode base64
     img_data = base64.b64decode(img['base64'])
-    
-    # Save to file
     Path(f"output_{img['file_name']}").write_bytes(img_data)
 ```
 
-### Decode and Save (Node.js)
-
+**Decode and Save (Node.js):**
 ```javascript
 const fs = require('fs');
 
@@ -232,11 +334,43 @@ response.images.forEach(img => {
 });
 ```
 
-### Display in HTML
-
+**Display in HTML:**
 ```html
 <img src="data:image/jpeg;base64,{base64_string_here}" alt="Page 1">
 ```
+
+### Binary Format
+
+**Save Directly (Python):**
+```python
+response = requests.post(
+    "http://localhost:2277/api/v1/pdf-to-images",
+    files={"file": open("doc.pdf", "rb")},
+    headers={"x-api-key": "your-key"},
+    params={"output_format": "binary"}
+).json()
+
+for img in response['images']:
+    # Convert array to bytes
+    img_bytes = bytes(img['binary'])
+    Path(f"output_{img['file_name']}").write_bytes(img_bytes)
+```
+
+**Save Directly (Node.js):**
+```javascript
+response.images.forEach(img => {
+  const buffer = Buffer.from(img.binary);
+  fs.writeFileSync(`output_${img.file_name}`, buffer);
+});
+```
+
+### Which Format to Use?
+
+| Format | Use Case | Pros | Cons |
+|--------|----------|------|------|
+| **base64** | Web apps, JSON APIs, embed in HTML | Easy to handle, text-based | ~33% larger |
+| **binary** | File storage, processing pipelines | Smaller size, native format | Requires conversion |
+| **both** | Flexibility, immediate use + storage | Best of both | Largest response |
 
 ---
 

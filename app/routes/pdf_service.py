@@ -1,4 +1,5 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
+from enum import Enum
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query
 
 from app.services.pdf_converter import convert_to_images
 from app.config import MAX_FILE_SIZE
@@ -6,8 +7,20 @@ from app.config import MAX_FILE_SIZE
 router = APIRouter()
 
 
+class OutputFormat(str, Enum):
+    BASE64 = "base64"
+    BINARY = "binary"
+    BOTH = "both"
+
+
 @router.post("/pdf-to-images")
-async def pdf_to_images(file: UploadFile = File(...)):
+async def pdf_to_images(
+    file: UploadFile = File(...),
+    output_format: OutputFormat = Query(
+        default=OutputFormat.BASE64,
+        description="Output format: 'base64' (default), 'binary', or 'both'"
+    )
+):
     if not file.content_type or "pdf" not in file.content_type.lower():
         raise HTTPException(
             status_code=400,
@@ -29,7 +42,7 @@ async def pdf_to_images(file: UploadFile = File(...)):
         )
     
     try:
-        images = convert_to_images(pdf_bytes)
+        images = convert_to_images(pdf_bytes, output_format=output_format.value)
         
         return {
             "pages": len(images),

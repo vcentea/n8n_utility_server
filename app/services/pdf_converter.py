@@ -13,7 +13,20 @@ DPI = 200
 IMAGE_FORMAT = "JPEG"
 
 
-def convert_to_images(pdf_bytes: bytes) -> List[Dict[str, Any]]:
+def convert_to_images(
+    pdf_bytes: bytes, 
+    output_format: str = "base64"
+) -> List[Dict[str, Any]]:
+    """
+    Convert PDF bytes to images in the specified format.
+    
+    Args:
+        pdf_bytes: PDF file as bytes
+        output_format: 'base64', 'binary', or 'both'
+    
+    Returns:
+        List of dictionaries containing page information and image data
+    """
     session_id = str(uuid.uuid4())
     temp_dir = os.path.join(TEMP_PATH, session_id)
     
@@ -44,13 +57,19 @@ def convert_to_images(pdf_bytes: bytes) -> List[Dict[str, Any]]:
             
             with open(file_path, "rb") as img_file:
                 img_bytes = img_file.read()
-                base64_str = base64.b64encode(img_bytes).decode("utf-8")
             
-            result.append({
+            page_data = {
                 "page": idx,
                 "file_name": file_name,
-                "base64": base64_str
-            })
+            }
+            
+            if output_format in ("base64", "both"):
+                page_data["base64"] = base64.b64encode(img_bytes).decode("utf-8")
+            
+            if output_format in ("binary", "both"):
+                page_data["binary"] = list(img_bytes)
+            
+            result.append(page_data)
         
         return result
     
