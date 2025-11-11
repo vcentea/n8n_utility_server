@@ -1,135 +1,147 @@
 # Quick Start Guide
 
-## Local Development (Windows)
+## 🐳 Docker (Recommended - Works Out of the Box)
 
-1. **Setup Environment:**
+**Zero configuration needed - Poppler included automatically!**
+
+```bash
+# 1. Create and configure .env
+cp .env.example .env
+# Edit .env and set your API_KEY
+
+# 2. Start the service
+docker-compose up -d
+
+# 3. Test it
+curl http://localhost:2277/health
+
+# 4. View logs
+docker-compose logs -f
+
+# 5. Stop
+docker-compose down
+```
+
+**That's it!** No Poppler installation, no dependencies to manage.
+
+---
+
+## 💻 Local Development
+
+### Windows
+
 ```cmd
-copy .env.example .env
-```
+REM 1. Run setup (installs everything)
+setup.bat
 
-2. **Edit .env and set your API_KEY:**
-```
-API_KEY=your-secret-key-here
-```
+REM 2. Edit .env and set your API_KEY
 
-3. **Download and install poppler:**
-   - Download from: https://github.com/oschwartz10612/poppler-windows/releases
-   - Extract and set the `POPPLER_PATH` value in `.env` (e.g. `C:\poppler\Library\bin`)
-
-4. **Run the service:**
-```cmd
+REM 3. Start the service
 start_local.bat
-```
 
-5. **Test the endpoint:**
-```cmd
+REM 4. Test the endpoint
 test_endpoint.bat
 ```
 
-Or test manually:
-```cmd
-curl -X POST http://localhost:2277/api/v1/pdf-to-images ^
-  -H "x-api-key: your-secret-key-here" ^
-  -F "file=@test.pdf"
-```
+### Linux / macOS
 
-## Local Development (Linux / macOS)
-
-1. **Setup Environment:**
 ```bash
-cp .env.example .env
-```
+# 1. Run setup (installs everything)
+chmod +x setup.sh
+./setup.sh
 
-2. **Edit `.env` and set values:**
-```bash
-API_KEY=your-secret-key-here
-POPPLER_PATH=/usr/local/bin  # optional if Poppler is not in PATH
-```
+# 2. Edit .env and set your API_KEY
 
-3. **Install poppler-utils:**
-```bash
-# Ubuntu / Debian
-sudo apt-get install poppler-utils
-
-# macOS (Homebrew)
-brew install poppler
-```
-
-4. **Run the service:**
-```bash
+# 3. Start the service
 chmod +x start_local.sh
 ./start_local.sh
-```
 
-5. **Test the endpoint:**
-```bash
+# 4. Test the endpoint
 chmod +x test_endpoint.sh
 ./test_endpoint.sh
 ```
 
-Or manually:
+---
+
+## API Documentation
+
+Access interactive docs at: http://localhost:2277/docs
+
+---
+
+## Production Deployment (Docker on Ubuntu)
+
 ```bash
-curl -X POST http://localhost:2277/api/v1/pdf-to-images \
-  -H "x-api-key: your-secret-key-here" \
-  -F "file=@test.pdf"
-```
+# 1. Clone repository
+git clone https://github.com/vcentea/n8n_utility_server.git
+cd n8n_utility_server
 
-## Docker Deployment
+# 2. Configure
+cp .env.example .env
+nano .env  # Set your API_KEY
 
-1. **Create .env file:**
-```cmd
-copy .env.example .env
-```
-
-2. **Build and run with Docker Compose:**
-```cmd
+# 3. Start with Docker Compose
 docker-compose up -d
-```
 
-3. **View logs:**
-```cmd
+# 4. Verify
+curl http://localhost:2277/health
+
+# 5. Monitor logs
 docker-compose logs -f
 ```
 
-4. **Stop the service:**
+---
+
+## Test the API
+
+### Using cURL
+
+```bash
+curl -X POST http://localhost:2277/api/v1/pdf-to-images \
+  -H "x-api-key: your-secret-key-here" \
+  -F "file=@/path/to/your.pdf"
+```
+
+### Using the Test Script
+
+**Windows:**
 ```cmd
-docker-compose down
+test_endpoint.bat
 ```
 
-## Testing
-
-Access the API documentation at: http://localhost:2277/docs
-
-## Production Deployment (Ubuntu)
-
-1. **Clone repository:**
+**Linux/macOS:**
 ```bash
-git clone <your-repo>
-cd utility-service
+./test_endpoint.sh
 ```
 
-2. **Configure environment:**
-```bash
-cp .env.example .env
-nano .env  # Set your API_KEY
-```
+---
 
-3. **Deploy with Docker:**
-```bash
-docker-compose up -d
-```
+## n8n Integration
 
-4. **Monitor:**
-```bash
-docker-compose logs -f utility-service
-```
+1. Add **HTTP Request** node
+2. Configure:
+   - **Method**: `POST`
+   - **URL**: `http://your-server:2277/api/v1/pdf-to-images`
+   - **Authentication**: None
+   - **Send Headers**: Yes
+     - Name: `x-api-key`
+     - Value: `your-secret-key-here`
+   - **Send Body**: Yes
+     - Content Type: `Form-Data Multipart`
+     - Specify Binary Property with your PDF file
 
-## Example n8n Integration
+3. The response will contain base64-encoded images for each PDF page
 
-1. Add HTTP Request node
-2. Set method: `POST`
-3. URL: `http://your-server:2277/api/v1/pdf-to-images`
-4. Add header: `x-api-key` = `your-secret-key-here`
-5. Body Content Type: `Form-Data Multipart`
-6. Specify Input Binary Field with your PDF
+---
 
+## Key Differences
+
+| Feature | Docker | Local Development |
+|---------|--------|-------------------|
+| **Poppler** | ✅ Auto-included | ❌ Manual install |
+| **Setup Time** | < 2 minutes | ~5 minutes |
+| **Dependencies** | None | Python, Poppler |
+| **Updates** | `docker-compose pull` | `git pull` + reinstall |
+| **Production Ready** | ✅ Yes | 🟡 Not recommended |
+
+**For production, always use Docker!**

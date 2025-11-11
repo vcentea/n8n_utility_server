@@ -42,65 +42,53 @@ utility-service/
 
 ## Installation
 
-### Local Development
+### 🐳 Docker (Recommended - Zero Configuration)
 
-1. Clone the repository
-2. Copy `.env.example` to `.env` and configure:
-
-```bash
-PORT=2277
-API_KEY=your-secret-api-key
-LOG_LEVEL=info
-TEMP_PATH=/tmp/pdf_service
-POPPLER_PATH=/path/to/poppler/bin  # required on Windows
-```
-
-3. Install dependencies:
+**Everything works out of the box!** Poppler is automatically included.
 
 ```bash
-pip install -r requirements.txt
+cp .env.example .env              # Configure (edit API_KEY)
+docker-compose up -d              # Start service
+curl http://localhost:2277/health # Verify it's running
 ```
 
-4. Install Poppler (PDF processing library):
-   - **Windows**: `choco install poppler` OR extract to `C:\poppler` ([Download](https://github.com/oschwartz10612/poppler-windows/releases))
-   - **Ubuntu/Debian**: `sudo apt-get install poppler-utils`
-   - **macOS**: `brew install poppler`
-   
-   See [POPPLER_SETUP.md](POPPLER_SETUP.md) for detailed instructions.
+✅ **No Poppler installation needed**  
+✅ **No manual dependencies**  
+✅ **Works the same on all platforms**
 
-5. Run the application:
+### 💻 Local Development
+
+Requires manual setup of Poppler and Python dependencies.
+
+**Quick Setup:**
+
+```bash
+# Windows
+setup.bat
+
+# Linux / macOS
+chmod +x setup.sh
+./setup.sh
+```
+
+The setup script will:
+- Check for Python
+- Install Poppler (with your permission)
+- Create virtual environment
+- Install all dependencies
+
+**Then start the service:**
 
 ```bash
 # Windows
 start_local.bat
 
 # Linux / macOS
-chmod +x start_local.sh
 ./start_local.sh
 ```
 
-### Docker Deployment
-
-1. Build the image:
-
-```bash
-docker build -t utility-service .
-```
-
-2. Run the container:
-
-```bash
-docker run -d -p 2277:2277 --env-file .env utility-service
-```
-
-Or use environment variables directly:
-
-```bash
-docker run -d -p 2277:2277 \
-  -e API_KEY=your-secret-api-key \
-  -e PORT=2277 \
-  utility-service
-```
+📖 **Full installation guide:** [INSTALLATION.md](INSTALLATION.md)  
+🔧 **Poppler troubleshooting:** [POPPLER_SETUP.md](POPPLER_SETUP.md)
 
 ## API Documentation
 
