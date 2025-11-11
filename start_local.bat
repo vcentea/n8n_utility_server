@@ -12,20 +12,9 @@ if not exist .env (
 
 echo Reading configuration from .env file...
 set "PORT="
-set "POPPLER_PATH="
 for /f "usebackq tokens=1,* delims==" %%A in (`findstr /b /i "PORT=" .env`) do set "PORT=%%B"
-for /f "usebackq tokens=1,* delims==" %%A in (`findstr /b /i "POPPLER_PATH=" .env`) do set "POPPLER_PATH=%%B"
 set "PORT=!PORT:"=%!"
 if "!PORT!"=="" set "PORT=2277"
-if not "!POPPLER_PATH!"=="" (
-    set "POPPLER_PATH=!POPPLER_PATH:"=%!"
-    if exist "!POPPLER_PATH!" (
-        echo Adding POPPLER_PATH to PATH: !POPPLER_PATH!
-        set "PATH=!POPPLER_PATH!;!PATH!"
-    ) else (
-        echo WARNING: POPPLER_PATH is set but directory does not exist: !POPPLER_PATH!
-    )
-)
 
 echo Checking for virtual environment...
 if not exist venv (

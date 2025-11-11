@@ -61,10 +61,12 @@ POPPLER_PATH=/path/to/poppler/bin  # required on Windows
 pip install -r requirements.txt
 ```
 
-4. Install poppler-utils:
+4. Install Poppler (PDF processing library):
+   - **Windows**: `choco install poppler` OR extract to `C:\poppler` ([Download](https://github.com/oschwartz10612/poppler-windows/releases))
    - **Ubuntu/Debian**: `sudo apt-get install poppler-utils`
    - **macOS**: `brew install poppler`
-   - **Windows**: Download from https://blog.alivate.com.au/poppler-windows/
+   
+   See [POPPLER_SETUP.md](POPPLER_SETUP.md) for detailed instructions.
 
 5. Run the application:
 
