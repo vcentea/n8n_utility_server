@@ -19,6 +19,12 @@ async def pdf_to_images(
     output_format: OutputFormat = Query(
         default=OutputFormat.BASE64,
         description="Output format: 'base64' (default), 'binary', or 'both'"
+    ),
+    dpi: int = Query(
+        default=200,
+        ge=72,
+        le=600,
+        description="Image resolution in DPI (72-600). Higher values produce larger, more detailed images while maintaining aspect ratio."
     )
 ):
     if not file.content_type or "pdf" not in file.content_type.lower():
@@ -42,12 +48,21 @@ async def pdf_to_images(
         )
     
     try:
-        images = convert_to_images(pdf_bytes, output_format=output_format.value)
+        images = convert_to_images(
+            pdf_bytes, 
+            output_format=output_format.value,
+            dpi=dpi
+        )
         
         return {
             "pages": len(images),
             "images": images
         }
+    except ValueError as e:
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
     except Exception as e:
         raise HTTPException(
             status_code=500,

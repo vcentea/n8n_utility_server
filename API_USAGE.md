@@ -11,6 +11,22 @@
   - `base64` (default) - Base64-encoded JPEG string
   - `binary` - Raw JPEG bytes as array
   - `both` - Both base64 and binary formats
+- `dpi` (optional): Image resolution in DPI (dots per inch)
+  - Range: 72-600
+  - Default: 200
+  - Higher values produce larger, more detailed images while maintaining aspect ratio
+  - Lower values (e.g., 72-150) for smaller file sizes
+  - Higher values (e.g., 300-600) for better quality
+
+**Response Fields (per image):**
+- `page` - Page number (1-indexed)
+- `file_name` - Generated filename (e.g., "page_1.jpg")
+- `width` - Image width in pixels
+- `height` - Image height in pixels
+- `mode` - Color mode (e.g., "RGB")
+- `size_bytes` - Size of the JPEG file in bytes
+- `base64` - Base64-encoded image data (if requested)
+- `binary` - Raw JPEG bytes as array (if requested)
 
 ---
 
@@ -31,6 +47,10 @@ Response:
     {
       "page": 1,
       "file_name": "page_1.jpg",
+      "width": 1654,
+      "height": 2339,
+      "mode": "RGB",
+      "size_bytes": 245678,
       "base64": "/9j/4AAQSkZJRgABAQEAYABgAAD..."
     }
   ]
@@ -52,6 +72,10 @@ Response:
     {
       "page": 1,
       "file_name": "page_1.jpg",
+      "width": 1654,
+      "height": 2339,
+      "mode": "RGB",
+      "size_bytes": 245678,
       "binary": [255, 216, 255, 224, 0, 16, 74, 70, ...]
     }
   ]
@@ -73,12 +97,92 @@ Response:
     {
       "page": 1,
       "file_name": "page_1.jpg",
+      "width": 1654,
+      "height": 2339,
+      "mode": "RGB",
+      "size_bytes": 245678,
       "base64": "/9j/4AAQSkZJRgABAQEAYABgAAD...",
       "binary": [255, 216, 255, 224, 0, 16, 74, 70, ...]
     }
   ]
 }
 ```
+
+---
+
+## Resolution Control
+
+### Setting Custom DPI
+
+Control the output image resolution using the `dpi` parameter. Higher DPI values create larger, more detailed images while maintaining the original aspect ratio.
+
+**Low Resolution (72 DPI) - Smallest file size:**
+```bash
+curl -X POST "http://localhost:2277/api/v1/pdf-to-images?dpi=72" \
+  -H "x-api-key: your-key" \
+  -F "file=@document.pdf"
+```
+
+**Standard Resolution (200 DPI) - Default:**
+```bash
+curl -X POST "http://localhost:2277/api/v1/pdf-to-images?dpi=200" \
+  -H "x-api-key: your-key" \
+  -F "file=@document.pdf"
+```
+
+**High Resolution (300 DPI) - Print quality:**
+```bash
+curl -X POST "http://localhost:2277/api/v1/pdf-to-images?dpi=300" \
+  -H "x-api-key: your-key" \
+  -F "file=@document.pdf"
+```
+
+**Maximum Resolution (600 DPI) - Maximum detail:**
+```bash
+curl -X POST "http://localhost:2277/api/v1/pdf-to-images?dpi=600" \
+  -H "x-api-key: your-key" \
+  -F "file=@document.pdf"
+```
+
+### Combining Parameters
+
+**High resolution with binary output:**
+```bash
+curl -X POST "http://localhost:2277/api/v1/pdf-to-images?dpi=300&output_format=binary" \
+  -H "x-api-key: your-key" \
+  -F "file=@document.pdf"
+```
+
+**Python example with custom DPI:**
+```python
+import requests
+
+with open("document.pdf", "rb") as f:
+    files = {"file": ("document.pdf", f, "application/pdf")}
+    headers = {"x-api-key": "your-secret-key"}
+    params = {"dpi": 300, "output_format": "base64"}
+    
+    response = requests.post(
+        "http://localhost:2277/api/v1/pdf-to-images",
+        files=files,
+        headers=headers,
+        params=params
+    )
+    
+    data = response.json()
+    print(f"Converted {data['pages']} pages at 300 DPI")
+    print(f"First page size: {data['images'][0]['width']}x{data['images'][0]['height']}")
+```
+
+### DPI Recommendations
+
+| Use Case | Recommended DPI | Notes |
+|----------|----------------|-------|
+| Web thumbnails | 72-100 | Smallest file size, fast processing |
+| Web display | 150-200 | Good balance of quality and size |
+| Document archival | 200-300 | Standard quality preservation |
+| Print documents | 300 | Standard print quality |
+| High-quality print | 600 | Maximum detail, large file sizes |
 
 ---
 
@@ -188,7 +292,10 @@ wget -qO- https://example.com/document.pdf | \
 4. **Headers:**
    - Name: `x-api-key`
    - Value: `your-secret-key`
-5. **Body:**
+5. **Query Parameters** (optional):
+   - Name: `output_format`, Value: `base64` (or `binary`, `both`)
+   - Name: `dpi`, Value: `200` (or any value 72-600)
+6. **Body:**
    - Content Type: `Form-Data Multipart`
    - Add Field:
      - Name: `file`
@@ -277,6 +384,13 @@ wget -qO- https://example.com/document.pdf | \
 ```json
 {
   "detail": "Invalid or missing PDF file"
+}
+```
+
+**400 Bad Request (Invalid DPI)**
+```json
+{
+  "detail": "DPI must be between 72 and 600. Got: 1000"
 }
 ```
 
@@ -408,19 +522,23 @@ This tests:
 
 - **Max File Size:** 10 MB (configurable in `app/config.py`)
 - **Format:** PDF only
-- **Output:** JPEG images at 200 DPI
+- **Output:** JPEG images at configurable DPI (72-600, default 200)
 - **Processing:** Synchronous (response waits for conversion)
+- **Aspect Ratio:** Always maintained regardless of DPI setting
 
 ---
 
 ## Performance
 
-Typical conversion times:
+Typical conversion times (at 200 DPI):
 - 1-page PDF: ~1 second
 - 5-page PDF: ~3-5 seconds
 - 10-page PDF: ~8-10 seconds
 
+**Note:** Higher DPI values will increase processing time and output file sizes proportionally.
+
 For large PDFs or batch processing, consider:
+- Using lower DPI (72-150) for faster processing
 - Increasing timeout settings in your HTTP client
 - Processing files asynchronously
 - Splitting large PDFs into smaller chunks

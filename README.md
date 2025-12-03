@@ -4,9 +4,10 @@ A minimal, production-deployable REST microservice for PDF-to-image conversion.
 
 ## Features
 
-- **PDF to Images**: Convert PDF files to base64-encoded JPEG images
+- **PDF to Images**: Convert PDF files to JPEG images (base64, binary, or both)
+- **Configurable Resolution**: Control output quality with DPI parameter (72-600)
 - **API Key Authentication**: Secure endpoints with static API key
-- **Docker Support**: Fully containerized deployment
+- **Docker Support**: Fully containerized deployment with easy updates
 - **Structured Logging**: JSON-formatted logs for monitoring
 - **FastAPI**: Modern, fast Python web framework
 
@@ -46,15 +47,26 @@ utility-service/
 
 **Everything works out of the box!** Poppler is automatically included.
 
+**First-time setup:**
 ```bash
 cp .env.example .env              # Configure (edit API_KEY)
 docker-compose up -d              # Start service
 curl http://localhost:2277/health # Verify it's running
 ```
 
+**Updating to latest version:**
+```bash
+# Linux / macOS
+./update_docker.sh
+
+# Windows
+update_docker.bat
+```
+
 ✅ **No Poppler installation needed**  
 ✅ **No manual dependencies**  
-✅ **Works the same on all platforms**
+✅ **Works the same on all platforms**  
+✅ **Easy updates with automatic git pull**
 
 ### 💻 Local Development
 
@@ -88,7 +100,8 @@ start_local.bat
 ```
 
 📖 **Full installation guide:** [INSTALLATION.md](INSTALLATION.md)  
-🔧 **Poppler troubleshooting:** [POPPLER_SETUP.md](POPPLER_SETUP.md)
+🔧 **Poppler troubleshooting:** [POPPLER_SETUP.md](POPPLER_SETUP.md)  
+🐳 **Docker updates:** [DOCKER_UPDATE.md](DOCKER_UPDATE.md)
 
 ## API Documentation
 
@@ -126,6 +139,9 @@ POST /api/v1/pdf-to-images
 - Content-Type: `multipart/form-data`
 - Body: `file` (PDF file, max 10 MB)
 - Header: `x-api-key: your-secret-api-key`
+- Query Parameters (optional):
+  - `output_format`: `base64` (default), `binary`, or `both`
+  - `dpi`: Resolution (72-600, default: 200)
 
 **Success Response (200):**
 ```json
@@ -154,11 +170,21 @@ POST /api/v1/pdf-to-images
 
 ### Testing with cURL
 
+**Basic conversion (default settings):**
 ```bash
 curl -X POST http://localhost:2277/api/v1/pdf-to-images \
   -H "x-api-key: your-secret-api-key" \
   -F "file=@sample.pdf"
 ```
+
+**High-resolution conversion:**
+```bash
+curl -X POST "http://localhost:2277/api/v1/pdf-to-images?dpi=300&output_format=base64" \
+  -H "x-api-key: your-secret-api-key" \
+  -F "file=@sample.pdf"
+```
+
+📖 **Complete API documentation:** [API_USAGE.md](API_USAGE.md)
 
 ### Testing with n8n
 
@@ -212,10 +238,11 @@ pip install reportlab
 
 ## Performance
 
-- Converts 5-page PDF in ~5 seconds
-- DPI: 200 (configurable in `pdf_converter.py`)
+- Converts 5-page PDF in ~5 seconds (at 200 DPI)
+- DPI: Configurable via API parameter (72-600, default: 200)
 - Output format: JPEG
 - Temporary files cleaned up after conversion
+- Higher DPI values increase processing time and output size proportionally
 
 ## Security
 
