@@ -1,5 +1,17 @@
 # API Usage Guide
 
+## Table of Contents
+
+- [PDF Service](#pdf-service)
+  - [PDF to Images](#pdf-to-images-endpoint)
+- [YouTube Service](#youtube-service)
+  - [Get Channel ID](#get-channel-id)
+  - [Get Subscriptions](#get-subscriptions)
+
+---
+
+# PDF Service
+
 ## PDF to Images Endpoint
 
 **Endpoint:** `POST /api/v1/pdf-to-images`
@@ -583,6 +595,219 @@ For large PDFs or batch processing, consider:
 Interactive API documentation available at:
 - **Swagger UI:** http://localhost:2277/docs
 - **ReDoc:** http://localhost:2277/redoc
+
+---
+
+---
+
+# YouTube Service
+
+The YouTube service provides endpoints for extracting channel information.
+
+**Base URL:** `/api/v1/youtube`
+
+**Rate Limit:** 5 requests per minute (per IP)
+
+---
+
+## Get Channel ID
+
+Extract the unique channel ID (UCID) from any YouTube channel URL.
+
+**Endpoint:** `GET /api/v1/youtube/channel-id`
+
+**Use Case:** Convert `@handle` URLs to stable channel IDs that never change.
+
+### Request
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | string | Yes | YouTube channel URL |
+
+**Supported URL formats:**
+- `https://www.youtube.com/@handle`
+- `https://www.youtube.com/channel/UCxxxxxxxx`
+- `https://www.youtube.com/c/channelname`
+- `https://www.youtube.com/user/username`
+
+**Note:** URL-encoded URLs are automatically decoded (e.g., `https%3A%2F%2Fwww.youtube.com%2F%40handle` works correctly).
+
+### cURL Example
+
+```bash
+curl -X GET "http://localhost:2277/api/v1/youtube/channel-id?url=https://www.youtube.com/@Fireship" \
+  -H "x-api-key: your-secret-key"
+```
+
+### Response
+
+```json
+{
+  "channel_id": "UCsBjURrPoezykLs9EqgamOA",
+  "channel_url": "https://www.youtube.com/channel/UCsBjURrPoezykLs9EqgamOA"
+}
+```
+
+### n8n Configuration
+
+**HTTP Request Node:**
+
+| Setting | Value |
+|---------|-------|
+| Method | `GET` |
+| URL | `http://your-server:2277/api/v1/youtube/channel-id` |
+| Authentication | None |
+| Headers | `x-api-key`: `your-secret-key` |
+| Query Parameters | `url`: `{{ $json.channel_url }}` |
+
+**n8n Expression Example:**
+```
+{{ $json.channel_id }}
+```
+
+---
+
+## Get Subscriptions
+
+Get public subscriptions for a YouTube channel.
+
+**Endpoint:** `GET /api/v1/youtube/subscriptions`
+
+**Requirement:** Channel subscriptions must be set to **public** in YouTube settings.
+
+### Request
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `channel_id` | string | No | env value | Channel ID (UC...) |
+| `max_results` | integer | No | 50 | Results per page (1-50) |
+
+### cURL Examples
+
+**Using default channel (from .env):**
+```bash
+curl -X GET "http://localhost:2277/api/v1/youtube/subscriptions" \
+  -H "x-api-key: your-secret-key"
+```
+
+**With specific channel:**
+```bash
+curl -X GET "http://localhost:2277/api/v1/youtube/subscriptions?channel_id=UC6S2pe9IBZkRuY1T_yZnIWQ&max_results=10" \
+  -H "x-api-key: your-secret-key"
+```
+
+### Response
+
+```json
+{
+  "total_results": 45,
+  "subscriptions": [
+    {
+      "channel_name": "Fireship",
+      "channel_id": "UCsBjURrPoezykLs9EqgamOA",
+      "channel_url": "https://www.youtube.com/channel/UCsBjURrPoezykLs9EqgamOA",
+      "description": "High-intensity code tutorials...",
+      "thumbnail": "https://yt3.ggpht.com/..."
+    },
+    {
+      "channel_name": "n8n",
+      "channel_id": "UCiFwARNDOICtXFzpbsqqV6g",
+      "channel_url": "https://www.youtube.com/channel/UCiFwARNDOICtXFzpbsqqV6g",
+      "description": "Workflow automation...",
+      "thumbnail": "https://yt3.ggpht.com/..."
+    }
+  ]
+}
+```
+
+### n8n Configuration
+
+**HTTP Request Node:**
+
+| Setting | Value |
+|---------|-------|
+| Method | `GET` |
+| URL | `http://your-server:2277/api/v1/youtube/subscriptions` |
+| Authentication | None |
+| Headers | `x-api-key`: `your-secret-key` |
+| Query Parameters | `channel_id`: `UC...` (optional), `max_results`: `50` (optional) |
+
+**n8n Expression to loop through subscriptions:**
+```
+{{ $json.subscriptions }}
+```
+
+**Get first subscription name:**
+```
+{{ $json.subscriptions[0].channel_name }}
+```
+
+---
+
+## YouTube Error Responses
+
+**400 Bad Request:**
+```json
+{
+  "detail": "Channel URL is required"
+}
+```
+
+**400 Forbidden (Private Subscriptions):**
+```json
+{
+  "detail": "Error 403: Forbidden. The subscriptions are still marked as 'Private' in the YouTube account settings."
+}
+```
+
+**404 Not Found:**
+```json
+{
+  "detail": "Channel not found. Please check the URL."
+}
+```
+
+**429 Too Many Requests:**
+```json
+{
+  "detail": "Rate limit exceeded: 5 per 1 minute"
+}
+```
+
+---
+
+## Complete n8n Workflow Example
+
+### Use Case: Get Channel IDs for Multiple Handles
+
+```
+[Manual Trigger] → [Set URLs] → [Split In Batches] → [HTTP Request] → [Merge Results]
+```
+
+**Step 1: Set URLs Node**
+```json
+{
+  "urls": [
+    "https://www.youtube.com/@Fireship",
+    "https://www.youtube.com/@n8n-io",
+    "https://www.youtube.com/@AllAboutAI"
+  ]
+}
+```
+
+**Step 2: HTTP Request Node (in loop)**
+- URL: `http://your-server:2277/api/v1/youtube/channel-id`
+- Query: `url` = `{{ $json.urls[$itemIndex] }}`
+- Header: `x-api-key` = `your-secret-key`
+
+**Step 3: Output**
+Each iteration returns:
+```json
+{
+  "channel_id": "UCsBjURrPoezykLs9EqgamOA",
+  "channel_url": "https://www.youtube.com/channel/UCsBjURrPoezykLs9EqgamOA"
+}
+```
 
 ---
 

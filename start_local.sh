@@ -34,13 +34,28 @@ fi
 if [[ ! -d "venv" ]]; then
   echo "Creating virtual environment..."
   "${PYTHON_BIN}" -m venv venv
+  if [[ $? -ne 0 ]]; then
+    echo "ERROR: Failed to create virtual environment!"
+    exit 1
+  fi
 fi
 
 # shellcheck source=/dev/null
 . venv/bin/activate
 
-echo "Installing dependencies..."
-pip install -r requirements.txt
+if [[ ! -f "venv/bin/python" ]]; then
+  echo "ERROR: Virtual environment is corrupted!"
+  echo "Please delete the venv folder and run this script again."
+  exit 1
+fi
+
+echo "Installing/updating dependencies..."
+venv/bin/python -m pip install --upgrade pip
+venv/bin/python -m pip install -r requirements.txt
+if [[ $? -ne 0 ]]; then
+  echo "ERROR: Failed to install dependencies!"
+  exit 1
+fi
 
 echo
 echo "Starting server on http://localhost:${PORT}"
@@ -49,5 +64,5 @@ echo
 echo "Press Ctrl+C to stop the server"
 echo
 
-uvicorn app.main:app --host 0.0.0.0 --port "${PORT}" --reload
+venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port "${PORT}" --reload
 

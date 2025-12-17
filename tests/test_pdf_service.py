@@ -19,7 +19,7 @@ def create_test_pdf(num_pages: int = 2) -> bytes:
 
 
 def test_convert_pdf():
-    from app.services.pdf_converter import convert_to_images
+    from app.services.pdf.converter import convert_to_images
     
     pdf_bytes = create_test_pdf(2)
     

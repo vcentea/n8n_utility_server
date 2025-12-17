@@ -11,6 +11,9 @@ LOG_LEVEL = os.getenv("LOG_LEVEL", "info")
 TEMP_PATH = os.getenv("TEMP_PATH", "/tmp/pdf_service")
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
+YOUTUBE_CHANNEL_ID = os.getenv("YOUTUBE_CHANNEL_ID", "")
+YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
+
 
 def find_poppler_path():
     """Auto-detect Poppler installation on Windows."""

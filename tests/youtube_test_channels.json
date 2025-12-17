@@ -1,0 +1,186 @@
+{
+  "for_update": {
+    "data": [
+      {
+        "account_name": "AI by Hand",
+        "account_url": "https://www.youtube.com/@ai-by-hand"
+      },
+      {
+        "account_name": "AI Engineer",
+        "account_url": "https://www.youtube.com/@aiDotEngineer"
+      },
+      {
+        "account_name": "AI Explained",
+        "account_url": "https://www.youtube.com/@aiexplained-official"
+      },
+      {
+        "account_name": "AI Jason",
+        "account_url": "https://www.youtube.com/@AIJasonZ"
+      },
+      {
+        "account_name": "AI Learning Communities",
+        "account_url": "https://www.youtube.com/@trainingsites"
+      },
+      {
+        "account_name": "AI Master",
+        "account_url": "https://www.youtube.com/@iamAImaster"
+      },
+      {
+        "account_name": "AICodeKing",
+        "account_url": "https://www.youtube.com/@AICodeKing"
+      },
+      {
+        "account_name": "aiwithbrandon",
+        "account_url": "https://www.youtube.com/@aiwithbrandon"
+      },
+      {
+        "account_name": "All About AI",
+        "account_url": "https://www.youtube.com/@AllAboutAI"
+      },
+      {
+        "account_name": "Andrej Karpathy",
+        "account_url": "https://www.youtube.com/@AndrejKarpathy"
+      },
+      {
+        "account_name": "Arseny Shatokhin",
+        "account_url": "https://www.youtube.com/@vrsen"
+      },
+      {
+        "account_name": "Business AI with Pooja",
+        "account_url": "https://www.youtube.com/@PoojaJain-PowerUp"
+      },
+      {
+        "account_name": "Chase AI",
+        "account_url": "https://www.youtube.com/@Chase-H-AI"
+      },
+      {
+        "account_name": "D-Squared",
+        "account_url": "https://www.youtube.com/@d-squared70"
+      },
+      {
+        "account_name": "Dave Ebbelaar",
+        "account_url": "https://www.youtube.com/@daveebbelaar"
+      },
+      {
+        "account_name": "David Ondrej",
+        "account_url": "https://www.youtube.com/@DavidOndrej"
+      },
+      {
+        "account_name": "DeepLearningAI",
+        "account_url": "https://www.youtube.com/@Deeplearningai"
+      },
+      {
+        "account_name": "Discover AI",
+        "account_url": "https://www.youtube.com/@code4AI"
+      },
+      {
+        "account_name": "Emergent Garden",
+        "account_url": "https://www.youtube.com/@EmergentGarden"
+      },
+      {
+        "account_name": "Fireship",
+        "account_url": "https://www.youtube.com/@Fireship"
+      },
+      {
+        "account_name": "IndyDevDan",
+        "account_url": "https://www.youtube.com/@indydevdan"
+      },
+      {
+        "account_name": "Jack Roberts",
+        "account_url": "https://www.youtube.com/@Itssssss_Jack"
+      },
+      {
+        "account_name": "Jeff Heaton",
+        "account_url": "https://www.youtube.com/@HeatonResearch"
+      },
+      {
+        "account_name": "LangChain",
+        "account_url": "https://www.youtube.com/@LangChain"
+      },
+      {
+        "account_name": "LLMs for Devs",
+        "account_url": "https://www.youtube.com/@devlearnllm"
+      },
+      {
+        "account_name": "Matt Wolfe",
+        "account_url": "https://www.youtube.com/@mreflow"
+      },
+      {
+        "account_name": "Matthew Berman",
+        "account_url": "https://www.youtube.com/@matthew_berman"
+      },
+      {
+        "account_name": "Maya Akim",
+        "account_url": "https://www.youtube.com/@maya-akim"
+      },
+      {
+        "account_name": "n8n",
+        "account_url": "https://www.youtube.com/@n8n-io"
+      },
+      {
+        "account_name": "Peter Hinssen",
+        "account_url": "https://www.youtube.com/@peterhinssen7270"
+      },
+      {
+        "account_name": "Prompt Engineering",
+        "account_url": "https://www.youtube.com/@engineerprompt"
+      },
+      {
+        "account_name": "Ryan Doser",
+        "account_url": "https://www.youtube.com/@RyanDoserAI"
+      },
+      {
+        "account_name": "Sam Witteveen",
+        "account_url": "https://www.youtube.com/@samwitteveenai"
+      },
+      {
+        "account_name": "Sean Kochel",
+        "account_url": "https://www.youtube.com/@iamseankochel"
+      },
+      {
+        "account_name": "Sebastien Bubeck",
+        "account_url": "https://www.youtube.com/@SebastienBubeck"
+      },
+      {
+        "account_name": "Serop | AI Automation",
+        "account_url": "https://www.youtube.com/@serop-ai"
+      },
+      {
+        "account_name": "Shaw Talebi",
+        "account_url": "https://www.youtube.com/@ShawhinTalebi"
+      },
+      {
+        "account_name": "Skill Leap AI",
+        "account_url": "https://www.youtube.com/@SkillLeapAI"
+      },
+      {
+        "account_name": "Stephen G. Pope",
+        "account_url": "https://www.youtube.com/@StephenGPope"
+      },
+      {
+        "account_name": "The AI Automators",
+        "account_url": "https://www.youtube.com/@TheAIAutomators"
+      },
+      {
+        "account_name": "Theo - t3․gg",
+        "account_url": "https://www.youtube.com/@t3dotgg"
+      },
+      {
+        "account_name": "Tina Huang",
+        "account_url": "https://www.youtube.com/@TinaHuang1"
+      },
+      {
+        "account_name": "What's AI by Louis-François Bouchard",
+        "account_url": "https://www.youtube.com/@WhatsAI"
+      },
+      {
+        "account_name": "Y Combinator",
+        "account_url": "https://www.youtube.com/@ycombinator"
+      },
+      {
+        "account_name": "Yaron Been",
+        "account_url": "https://www.youtube.com/@YaronBeen"
+      }
+    ]
+  }
+}

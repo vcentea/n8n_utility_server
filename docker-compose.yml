@@ -10,6 +10,8 @@ services:
       - API_KEY=${API_KEY}
       - LOG_LEVEL=${LOG_LEVEL:-info}
       - TEMP_PATH=/tmp/pdf_service
+      - YOUTUBE_CHANNEL_ID=${YOUTUBE_CHANNEL_ID:-}
+      - YOUTUBE_API_KEY=${YOUTUBE_API_KEY:-}
     volumes:
       - temp_storage:/tmp/pdf_service
     restart: unless-stopped

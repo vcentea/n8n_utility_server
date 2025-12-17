@@ -1,0 +1,417 @@
+{
+  "name": "scan pdfs into json",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        192,
+        -128
+      ],
+      "id": "ea2c635a-cec0-4b0c-a98f-fdd7c6e51b3d",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3d932042-770f-4dfa-9d05-aa8cba64c004",
+              "name": "Prompt",
+              "value": "=Get the all the test in this images and export it in a nice JSON format.\nReply directly in the JSON format.\n\nStructure it in Section, sub-section, and then the points \n\ndo not put anything in front start your answer with {\n\n\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        400,
+        -144
+      ],
+      "id": "d6ab06fb-1932-43ca-afef-a502a76f5604",
+      "name": "the prompt"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": "={{ $prevNode.name === \"Split Out\" }}"
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        2128,
+        -128
+      ],
+      "id": "8d6fde35-3695-4919-a803-4206d49a0342",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "images_data.images",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1840,
+        -128
+      ],
+      "id": "0cbd6147-a2b8-4007-a027-10f10e1e82a6",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {
+          "binaryPropertyName": "invoice_file"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1168,
+        -128
+      ],
+      "id": "3715d6d4-923e-4c09-afe6-6e6e37585b88",
+      "name": "Download file2",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EpONBwwGz13p1V0E",
+          "name": "Google Drive account GMAIL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "1d5VMuw_FtWyXc7VkQaukOVOepWK4AHeE",
+            "mode": "list",
+            "cachedResultName": "forms_ocr",
+            "cachedResultUrl": "https://drive.google.com/drive/folders/1d5VMuw_FtWyXc7VkQaukOVOepWK4AHeE"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        672,
+        -144
+      ],
+      "id": "8082f7e0-cb04-4d8a-85ac-637755f486c4",
+      "name": "Search files and folders1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "EpONBwwGz13p1V0E",
+          "name": "Google Drive account GMAIL"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://aiapi.ainnovate.tech/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}\n\n",
+        "options": {
+          "timeout": 1000000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2816,
+        -112
+      ],
+      "id": "205dc869-dc23-4ede-8a5e-9875471490ce",
+      "name": "LLM Request to OCR1",
+      "executeOnce": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "UqveCvhGJgP4KIiM",
+          "name": "uat-dev"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://utility-server.ainnovate.tech/api/v1/pdf-to-images?output_format=base64&dpi=400",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "invoice_file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1408,
+        -128
+      ],
+      "id": "633002e7-5cbb-4a20-a748-d5b61df635c6",
+      "name": "Convert pdf to images1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "VYW4cmYOGTd30pzw",
+          "name": "utility server prod"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "20bcc3c2-f681-4def-9cc5-d0878babcad8",
+              "name": "choices[0].message.content",
+              "value": "={{ $json.choices[0].message.content }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3152,
+        -112
+      ],
+      "id": "9262682f-3c30-48cb-9cb6-58ac8a1a7271",
+      "name": "invoice as JSON1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": "={{ $prevNode.name === \"Search files and folders\" }}"
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        912,
+        -144
+      ],
+      "id": "dfcaa554-4c50-4bea-b7fb-120dd974d4ea",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// In a Code node\nconst prompt = $('the prompt').item.json.Prompt;\n\n// Build content array\nconst content = [\n  {\n    type: \"text\",\n    text: prompt\n  }\n];\n\n// Add all images\ncontent.push({\n  type: \"image_url\",\n  image_url: {\n    url: `data:image/jpeg;base64,${$input.first().json.base64}`\n  }\n});\n\n// Return the complete request body\nreturn {\n  json: {\n    model: \"qwen/qwen3-vl-30b\",\n    messages: [\n      {\n        role: \"system\",\n        content: content\n      },\n      {\n        role: \"user\",\n        content: content\n      }\n    ],\n    temperature: 0.1,              // Changed from 0\n    max_tokens: 7096,               // Add explicit limit\n    repetition_penalty: 1.1,        // Penalize repetition\n    frequency_penalty: 0.5,         // Reduce token reuse\n    presence_penalty: 0.3,          // Encourage diversity\n    top_p: 0.9,                     // Add nucleus sampling\n    stream: false\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2448,
+        -112
+      ],
+      "id": "3faeb738-bc83-493b-b77e-0d35fb66a698",
+      "name": "LLM payload1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ef52d572-9e3d-47e2-972f-1797b076c747",
+              "name": "images_data",
+              "value": "={{ $json }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1632,
+        -128
+      ],
+      "id": "8bd0741a-b8a5-4d19-b031-f4a48e595b3d",
+      "name": "Edit Fields2"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "the prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "the prompt": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "LLM payload1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file2": {
+      "main": [
+        [
+          {
+            "node": "Convert pdf to images1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM Request to OCR1": {
+      "main": [
+        [
+          {
+            "node": "invoice as JSON1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert pdf to images1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Download file2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LLM payload1": {
+      "main": [
+        [
+          {
+            "node": "LLM Request to OCR1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "invoice as JSON1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2256e29b-9330-4158-be0e-6e653e1449d6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "80f7ddfe58cbb73656fab983ec268140b1eb766cf09a532086c4ec7c26411b92"
+  },
+  "id": "I8Lu5nAVE8ZSmfjo",
+  "tags": []
+}

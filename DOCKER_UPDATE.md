@@ -60,6 +60,26 @@ The script will:
 - Docker configuration
 - API endpoints and features
 
+## Important: Docker Image & Dependencies
+
+The Docker image has been updated from Alpine to Playwright's base image to support the YouTube service. This change:
+
+- **Increases image size** (~2GB vs ~200MB) due to Chromium browser inclusion
+- **Enables browser automation** for reliable YouTube channel ID extraction
+- **Includes ffmpeg** for yt-dlp transcript extraction
+- **Requires rebuild** with `--no-cache` flag on first update
+
+**System dependencies installed:**
+- `poppler-utils` - PDF processing
+- `ffmpeg` - Required by yt-dlp for media/subtitle processing
+- `chromium` - Browser automation via Playwright
+
+```bash
+# Force full rebuild after this update
+docker-compose build --no-cache
+docker-compose up -d
+```
+
 ## What Stays the Same
 
 - Your `.env` configuration (backed up to `.env.backup`)
@@ -209,5 +229,7 @@ The update script automatically backs up `.env`, but consider:
 - **Documentation:** See README.md, API_USAGE.md
 - **Issues:** Check container logs first
 - **Manual deployment:** See DEPLOYMENT.md
+
+
 
 
