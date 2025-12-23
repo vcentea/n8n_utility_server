@@ -10,6 +10,8 @@ from typing import Dict, Any, Optional, List
 
 import yt_dlp
 
+from app.config import YOUTUBE_COOKIES_PATH
+
 logger = logging.getLogger(__name__)
 
 VIDEO_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{11}$")
@@ -85,7 +87,46 @@ def get_video_transcript(
             "outtmpl": subtitle_file,
             "quiet": True,
             "no_warnings": True,
+            # Make requests look more like a real browser (helps with server IPs)
+            "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "referer": "https://www.youtube.com/",
         }
+        
+        # Cookie strategy (helps with server IPs + restricted videos):
+        # 1. Use cookie file if provided (production)
+        # 2. Try auto-extract from Firefox (dev - works on Windows)
+        # 3. Try auto-extract from Chrome/Edge (dev - may fail on Windows DPAPI)
+        # 4. Continue without cookies (may fail for restricted content)
+        
+        cookie_source = None
+        
+        if YOUTUBE_COOKIES_PATH and os.path.exists(YOUTUBE_COOKIES_PATH):
+            # Production: use cookie file
+            ydl_opts["cookiefile"] = YOUTUBE_COOKIES_PATH
+            cookie_source = f"file: {YOUTUBE_COOKIES_PATH}"
+        else:
+            # Development: try auto-extract from browser
+            # Firefox works best on Windows (no DPAPI issues)
+            for browser in ["firefox", "chrome", "edge"]:
+                try:
+                    # Test if we can use this browser's cookies
+                    test_opts = {"cookiesfrombrowser": (browser,), "quiet": True}
+                    with yt_dlp.YoutubeDL(test_opts) as test_ydl:
+                        # Quick validation - just check if cookies are accessible
+                        test_ydl.cookiejar
+                        ydl_opts["cookiesfrombrowser"] = (browser,)
+                        cookie_source = f"browser: {browser}"
+                        break
+                except Exception:
+                    continue
+        
+        if cookie_source:
+            logger.info(f"Using cookies from {cookie_source}")
+        else:
+            logger.warning(
+                "No cookies available - may fail with restricted videos or from server IPs. "
+                "Set YOUTUBE_COOKIES_PATH or use Firefox logged into YouTube."
+            )
         
         # Set language preferences
         if language:
@@ -316,6 +357,8 @@ def _parse_timestamp(ts: str) -> float:
             return float(ts)
     except ValueError:
         return 0.0
+
+
 
 
 

@@ -1,0 +1,62 @@
+═══════════════════════════════════════════════════════════════════
+  QUICK FIX: YouTube Authentication Error in Production
+═══════════════════════════════════════════════════════════════════
+
+ERROR: 400 - "This video requires authentication to access."
+
+CAUSE: yt-dlp needs YouTube cookies to access restricted videos.
+       YOUTUBE_API_KEY is only for the Data API, not transcripts.
+
+═══════════════════════════════════════════════════════════════════
+  3-STEP FIX
+═══════════════════════════════════════════════════════════════════
+
+STEP 1: Export Cookies (on your local machine)
+──────────────────────────────────────────────
+  EASY WAY: Run export_cookies.bat (uses project venv)
+  
+  OR MANUAL:
+  a) Install Chrome extension: "Get cookies.txt LOCALLY"
+  b) Go to YouTube.com (logged in)
+  c) Click extension → Export → Save as "cookies.txt"
+
+STEP 2: Copy to Production Server
+──────────────────────────────────────────────
+  scp cookies.txt user@server:/path/to/project/cookies.txt
+
+STEP 3: Update & Rebuild on Server
+──────────────────────────────────────────────
+  cd /path/to/n8n_utility_server
+  
+  # Add to .env file:
+  echo "YOUTUBE_COOKIES_PATH=/app/cookies.txt" >> .env
+  echo "YOUTUBE_COOKIES_FILE=./cookies.txt" >> .env
+  
+  # Rebuild container
+  ./update_docker.sh
+
+═══════════════════════════════════════════════════════════════════
+  VERIFY IT WORKS
+═══════════════════════════════════════════════════════════════════
+
+  # Check logs for confirmation
+  docker-compose logs | grep cookies
+  
+  # Should see:
+  # "Using cookies from: /app/cookies.txt"
+
+═══════════════════════════════════════════════════════════════════
+  IMPORTANT NOTES
+═══════════════════════════════════════════════════════════════════
+
+  ⚠️  Cookies expire after ~2-4 weeks (need to refresh)
+  ✅  Works without cookies for public videos
+  ❌  Needs cookies for age-restricted/members-only videos
+  🔒  cookies.txt is already in .gitignore (not committed)
+
+═══════════════════════════════════════════════════════════════════
+
+For detailed instructions, see: PRODUCTION_FIX.md
+For cookie documentation, see: YOUTUBE_COOKIES.md
+
+

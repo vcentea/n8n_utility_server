@@ -34,6 +34,11 @@ venv.bak/
 .env.local
 .env.*.local
 
+# YouTube Cookies (sensitive)
+cookies.txt
+*.cookies
+*.cookies.txt
+
 # IDE
 .vscode/
 .idea/

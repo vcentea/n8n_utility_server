@@ -13,6 +13,7 @@ MAX_FILE_SIZE = 10 * 1024 * 1024
 
 YOUTUBE_CHANNEL_ID = os.getenv("YOUTUBE_CHANNEL_ID", "")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY", "")
+YOUTUBE_COOKIES_PATH = os.getenv("YOUTUBE_COOKIES_PATH", "")
 
 
 def find_poppler_path():
