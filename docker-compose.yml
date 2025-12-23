@@ -15,7 +15,7 @@ services:
       - YOUTUBE_COOKIES_PATH=${YOUTUBE_COOKIES_PATH:-}
     volumes:
       - temp_storage:/tmp/pdf_service
-      - ${YOUTUBE_COOKIES_FILE:-./cookies.txt}:/app/cookies.txt:ro
+      - ${YOUTUBE_COOKIES_FILE:-./cookies.txt}:/app/cookies.txt
     restart: unless-stopped
 
 volumes:
